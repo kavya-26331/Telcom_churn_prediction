@@ -1,0 +1,6 @@
+@echo off
+echo Installing dependencies...
+pip install fastapi uvicorn
+
+echo Starting FastAPI server...
+python main.py
