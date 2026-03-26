@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import './App.css';
 
+// Set API URL based on environment
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 function App() {
   const [formData, setFormData] = useState({
     // Numeric fields
@@ -51,26 +54,41 @@ function App() {
     setPrediction(null);
 
     try {
+      // Use the API_URL from environment variable
       const response = await axios.post(
-        "http://localhost:8000/predict",
+        `${API_URL}/predict`,
         formData,
         { headers: { "Content-Type": "application/json" } }
       );
 
       setPrediction(response.data);
+      console.log('Prediction response:', response.data);
 
     } catch (error) {
-      console.error(error);
+      console.error('API Error:', error);
+      console.error('Error details:', error.response || error.message);
+      
+      let errorMessage = "Error making prediction. ";
+      
+      if (error.code === 'ERR_NETWORK') {
+        errorMessage += "Cannot connect to backend server. Please ensure the backend is running.";
+      } else if (error.response) {
+        errorMessage += `Server error: ${error.response.status}`;
+      } else {
+        errorMessage += error.message;
+      }
+      
       setPrediction({
         prediction: "Error",
         churn_probability: 0,
         risk_level: "Error",
-        message: "Error making prediction. Please check if the backend server is running."
+        message: errorMessage
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   // Styles
   const styles = {
